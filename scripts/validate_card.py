@@ -181,8 +181,8 @@ def main() -> None:
 
     total = 0
     bad = 0
-    for raw in args.paths:
-        for path in collect(Path(raw)):
+    for target in args.paths:
+        for path in collect(Path(target)):
             total += 1
             errors = validate(path)
             if errors:

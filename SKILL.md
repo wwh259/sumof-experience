@@ -24,7 +24,7 @@ python3 <本 skill 目录>/scripts/resolve_project.py --cwd <项目目录>
 
 | status | 动作 |
 |---|---|
-| `ok` | 使用返回的 `raw_dir` 作为唯一输出目录 |
+| `ok` | 使用返回的 `cards_dir` 作为唯一输出目录 |
 | `needs_config` | 询问用户：用默认路径还是指定其它路径；确认后执行 `--init`（用默认时省略路径参数），再重跑解析 |
 | `error` | 停止并向用户报告原因 |
 
@@ -34,7 +34,7 @@ python3 <本 skill 目录>/scripts/resolve_project.py --cwd <项目目录>
 - 未取得 `project_id` 前不得动笔。
 - 项目目录不存在则新建，已存在则直接复用。
 - 同一项目在 Trae / WorkBuddy / Codex 中调用，会得到同一个 `project_id` 和同一个目录。
-- `raw/` 是只追加层：写入后不得修改、不得覆盖。`wiki/`、`index.md`、`log.md` 不归本 skill 管。
+- `cards/` 是只追加层：写入后不得修改、不得覆盖。`wiki/`、`index.md`、`log.md` 不归本 skill 管。
 - Python 不可用时，按 [references/knowledge-base.md](references/knowledge-base.md) 的降级命令手工执行同样逻辑。
 
 ## 第二步：抽取
@@ -46,11 +46,11 @@ python3 <本 skill 目录>/scripts/resolve_project.py --cwd <项目目录>
 5. **补证据**。每条标注证据来源与置信度；无证据的降级为待验证。
 6. **按模板写作**。用 [assets/experience-template.md](assets/experience-template.md)。
 7. **过自检**。全部通过才落盘。
-8. **写入并校验**。写入 `<raw_dir>/YYYYMMDD-<主题>.md`，运行 `scripts/validate_card.py <文件>`；FAIL 则按报错修正，PASS 后才回报路径、条数、最低置信度条目、是否触发拆分。
+8. **写入并校验**。写入 `<cards_dir>/YYYYMMDD-<主题>.md`，运行 `scripts/validate_card.py <文件>`；FAIL 则按报错修正，PASS 后才回报路径、条数、最低置信度条目、是否触发拆分。
 
 ## 输出
 
-- 路径：`<KB>/<project_id>/raw/YYYYMMDD-<英文短横线主题>.md`（以脚本返回的 `raw_dir` 为准）
+- 路径：`<KB>/<project_id>/cards/YYYYMMDD-<英文短横线主题>.md`（以脚本返回的 `cards_dir` 为准）
 - 一次抽取产出 1 个文件；满足拆分条件时产出多个，见 [format-spec.md](references/format-spec.md)
 - 文件内 `background` 与每条经验的 `背景` 必填，供知识库模块与数字分身分类
 

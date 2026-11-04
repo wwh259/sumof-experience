@@ -25,8 +25,8 @@ DEFAULT_KB = Path("D:/Knowledge-base") if os.name == "nt" else Path.home() / "Kn
 
 
 def home_dir() -> Path:
-    raw = os.environ.get("SUM_OF_EXPERIENCE_HOME") or str(DEFAULT_HOME)
-    return Path(raw).expanduser().resolve()
+    home = os.environ.get("SUM_OF_EXPERIENCE_HOME") or str(DEFAULT_HOME)
+    return Path(home).expanduser().resolve()
 
 
 def config_path() -> Path:
@@ -216,8 +216,8 @@ def main() -> None:
     slug = build_slug(info["remote"], info["relpath"], info["root"], info["identity"].startswith("git"))
     project_dir = kb / slug
     project_dir.mkdir(parents=True, exist_ok=True)
-    raw_dir = project_dir / "raw"
-    raw_dir.mkdir(parents=True, exist_ok=True)
+    cards_dir = project_dir / "cards"
+    cards_dir.mkdir(parents=True, exist_ok=True)
     created = update_registry(kb, slug, info)
     write_if_changed(
         project_dir / ".project.json",
@@ -240,7 +240,7 @@ def main() -> None:
             "kb_path": str(kb),
             "project_id": slug,
             "project_dir": str(project_dir),
-            "raw_dir": str(raw_dir),
+            "cards_dir": str(cards_dir),
             "remote": info["remote"],
             "relpath": info["relpath"],
             "identity": info["identity"],

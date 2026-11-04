@@ -71,22 +71,22 @@ slug 生成：
   index.md                         # 知识库 skill 维护：主题页目录
   log.md                           # 知识库 skill 维护：追加式操作日志
   .registry.json                   # 项目登记表：id / remote / relpath / aliases
-  wwh259__skills__sumof-experience/
+  hengze259__sumof-experience/
     .project.json                  # 本项目元信息
-    raw/                           # 本 skill 独占写入，只追加
+    cards/                         # 本 skill 独占写入，只追加
       20261104-<主题>.md
     wiki/                          # 知识库 skill 独占写入，本 skill 不创建、不改动
   acme__api/
     .project.json
-    raw/
+    cards/
     wiki/
 ```
 
 - 知识库不记录任何绝对路径，避免多机 git 同步冲突。
 - 同一 remote + 同一相对路径 → 同一目录，与机器、平台、克隆位置无关。
 - 项目目录不存在则新建；已存在则直接复用，不重建、不覆盖已有经验文件。
-- `raw/` 与 `wiki/` 是相反写入语义：raw 只追加，wiki 可重写。混放会让不可变约束失效。
-- 本 skill 只创建 `raw/`；`wiki/`、`index.md`、`log.md` 由知识库 skill 负责。
+- `cards/` 与 `wiki/` 是相反写入语义：cards 只追加，wiki 可重写。混放会让不可变约束失效。
+- 本 skill 只创建 `cards/`；`wiki/`、`index.md`、`log.md` 由知识库 skill 负责。
 
 ## 4. 跨平台一致
 
