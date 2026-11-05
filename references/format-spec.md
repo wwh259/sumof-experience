@@ -2,7 +2,7 @@
 
 ## 1. 文件位置与命名
 
-- 目录：`<KB>/<project_id>/cards/`（由 `scripts/resolve_project.py` 解析）
+- 目录：`<KB>/experience/<项目>/`（由 `scripts/resolve_project.py` 解析）
 - 文件名：`YYYYMMDD-<主题>.md`，主题用小写英文短横线，不超过 6 个词
 - 一个文件 = 一次抽取 = 一个可独立理解的主题
 

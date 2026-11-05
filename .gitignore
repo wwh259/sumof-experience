@@ -16,3 +16,6 @@ __pycache__/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# 工作区记忆（项目本地数据，不随 skill 发布）
+.workbuddy/

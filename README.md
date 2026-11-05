@@ -2,7 +2,8 @@
 
 把对话或文件中的可复用经验，沉淀为结构化经验卡，并按项目自动归档到知识库。目前主要用于AI应用开发项目的开发总结。
 
-这是一个独立运行的经验总结 skill：只负责**抽取**与**写入**，不做索引、不做检索。知识库与数字分身可作为后续独立模块，通过文件契约解耦。
+这是一个独立运行的经验总结 skill：只负责**抽取**与**写入** `experience/` 层，不做索引、不做检索、不写数字分身记忆。
+知识库（`knowledge_base`）与数字分身（`digital_twin`）是独立项目，三者通过文件契约解耦：KB 管存储，本 skill 管抽取，分身管归纳。
 
 ## 特性
 
@@ -20,7 +21,7 @@
    ├─ 抽取 5 类内容：决策 / 坑 / 模式 / 约束 / 有效路径
    ├─ 标注坐标：阶段 × 分层 × 模块
    ├─ 写经验卡（固定结构 + 证据 + 置信度）
-   └─ 写入 <知识库>/<项目>/cards/
+   └─ 写入 <知识库>/experience/<项目>/
 ```
 
 ## 快速开始
@@ -32,18 +33,19 @@
 ### 2. 首次配置知识库
 
 ```bash
-python3 scripts/resolve_project.py --cwd <项目目录>
-# Windows 用 py 代替 python3
+python scripts/resolve_project.py --cwd <项目目录>
+# 本机 python 可用；若指向应用商店存根（退出码 9009），改用 py 或 python3
 ```
 
 首次运行返回 `needs_config`，按提示确认知识库路径后初始化：
 
 ```bash
-python3 scripts/resolve_project.py --init                 # 使用默认路径
-python3 scripts/resolve_project.py --init "D:/KB"         # 指定其它路径
+python scripts/resolve_project.py --init                 # 使用默认路径
+python scripts/resolve_project.py --init "<用户指定的知识库绝对路径>"   # 首次使用，路径由用户确认
 ```
 
-默认路径：Windows 为 `D:/Knowledge-base`，其它平台为 `~/Knowledge-base`。配置写在 `~/.sumof-experience/config.json`，不随仓库同步。
+默认路径：Windows 为 `D:/Knowledge-base`，其它平台为 `~/Knowledge-base`，**固定不变**；本机若不用默认路径，首次使用时由用户指定 `--init "<绝对路径>"`，之后不再询问。
+配置写在 `~/.sumof-experience/config.json`（机器级，不随仓库同步），可用 `--show` 查看；目录结构的定义以知识库仓库的 README 与契约文档为准，不靠配置传递。
 
 ### 3. 使用
 
@@ -52,35 +54,27 @@ python3 scripts/resolve_project.py --init "D:/KB"         # 指定其它路径
 输出位置：
 
 ```
-<KB>/<project_id>/cards/YYYYMMDD-<主题>.md
+<KB>/experience/<项目>/YYYYMMDD-<主题>.md
 ```
 
 ### 4. 校验
 
 ```bash
-python3 scripts/validate_card.py <文件或目录>
+python scripts/validate_card.py <文件或目录>
 ```
 
 ## 项目识别
 
-`project_id` 由 git remote 与仓库内相对路径生成，保证不同平台、不同克隆位置落到同一目录：
+项目键以知识库台账 `_index.json` 的 `project` 字段为单一来源，与 `raw/<项目>/` 目录同名；台账里没有该名字时用当前目录名。不再另造 git slug，避免两套 ID 对不上。
 
-| 场景 | project_id |
-|---|---|
-| github.com/acme/api | `acme__api` |
-| 同一仓库下的子项目 | `owner__repo__subdir` |
-| 无 remote | `repo--<路径短哈希>` |
-| 非 git 目录 | `dirname__<路径短哈希>` |
-
-知识库目录结构：
+知识库的两层结构（本 skill 只写第二层）：
 
 ```
 <KB>/
-├─ .registry.json               # 项目登记表
-└─ <project_id>/
-   ├─ .project.json             # 项目元信息
-   ├─ cards/                    # 本 skill 写入，只追加
-   └─ wiki/                     # 知识库 skill 维护，本 skill 不创建
+├─ raw/<项目>/<平台>/<日期>_<主题>.md    # L0 原文，无判断，只进不改
+├─ experience/<项目>/YYYYMMDD-<主题>.md  # L1 经验卡，本 skill 独占只追加
+├─ _index.json                          # 台账，本 skill 只读
+└─ _candidates/ · _index/               # 导航与视图，本 skill 不碰
 ```
 
 ## 经验卡格式
@@ -120,7 +114,7 @@ python3 scripts/validate_card.py <文件或目录>
 | 路径 | 作用 |
 |---|---|
 | `SKILL.md` | skill 入口，触发条件与执行流程 |
-| `references/knowledge-base.md` | 知识库配置、项目识别、跨平台一致性 |
+| `references/knowledge-base.md` | 知识库两层结构、配置、项目键、降级命令 |
 | `references/ai-app-taxonomy.md` | 三轴枚举与归类规则 |
 | `references/format-spec.md` | 卡片字段、规模上限、拆分与修订 |
 | `references/extraction-rules.md` | 采什么、丢什么、置信度分级 |
@@ -128,6 +122,8 @@ python3 scripts/validate_card.py <文件或目录>
 | `scripts/resolve_project.py` | 解析知识库与项目目录 |
 | `scripts/validate_card.py` | schema v1 校验器 |
 | `examples/` | 样张与回归样本 |
+
+> **通用性约定**：本仓库不含任何本机真实路径；`schema_version` 与默认知识库路径是固定常量，后续更新不改。
 
 ## 版本
 
