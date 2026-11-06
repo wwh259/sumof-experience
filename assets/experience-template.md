@@ -12,6 +12,11 @@ type: {{decision | pitfall | pattern | constraint | path}}
 status: active
 confidence: {{0.3–0.9}}
 tags: [{{2–5 个}}]
+track: {{slow | fast | fact}}
+# track 说明（必填，归纳进 L2 时直接映射复核周期）：
+#   slow = 方法论/判断原则（+365 天复核）
+#   fast = 工具/版本/价格/可用性（+90 天复核）
+#   fact = 已发生完毕的历史事件（豁免复核）
 supersedes: []
 superseded_by: []
 related: []

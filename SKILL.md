@@ -1,6 +1,7 @@
 ---
-name: summarize-experience
-description: 从对话或文件中提取可复用的经验资产，按项目自动归档到指定知识库。当用户说「总结经验」「沉淀经验」「提取经验」「复盘这个对话」「这份文档有什么可复用的经验」时使用；也适用于任务、调试、评审结束后的结论归档。
+name: sumof-experience
+description: 从对话或文件中提取可复用的经验资产，按项目自动归档到知识库 experience/ 层。当用户说「总结经验」「沉淀经验」「提取经验」「复盘这个对话」「这份文档有什么可复用的经验」时使用；也适用于任务、调试、评审结束后的结论归档。不负责把经验卡归纳为数字分身 L2 条目（那由 digital_twin 的 digest-dialogue 负责）。
+version: 1.1.0
 ---
 
 # 经验总结
@@ -14,10 +15,22 @@ description: 从对话或文件中提取可复用的经验资产，按项目自�
 不写知识库台账、不建索引、不改 `raw/`、不写数字分身的记忆条目、不执行 git 操作。
 采集 / 台账 / 视图归 `knowledge_base`；把经验卡归纳成 L2 记忆归 `digital_twin`。三方平时独立维护，只在抽取与归纳时通过文件连接。
 
+### 适用
+
+- 一次对话或一份文件结束，需要把结论固化为可复用经验
+- 任务、调试、评审结束后的结论归档
+- 需要把项目经验沉淀到知识库 `experience/`
+
+### 不适用
+
+- 已抽好的经验卡要归纳成 L2 记忆条目 → 走 digital_twin 的 `digest-dialogue`
+- 采集对话原文、维护台账与索引 → 走 `knowledge_base`
+- 只要会议纪要或内容摘要，不需要可复用结论 → 用普通总结即可
+
 ## 第一步：解析知识库与项目（必须先执行）
 
 ```bash
-python <本 skill 目录>/scripts/resolve_project.py --cwd <项目目录>
+python <本 skill 目录>/scripts/resolve_project.py --cwd <项目目录> --slug <英文短横线主题>
 # 本机 python 可用；若指向应用商店存根（退出码 9009），改用 py 或 python3
 ```
 
@@ -48,7 +61,7 @@ python <本 skill 目录>/scripts/resolve_project.py --cwd <项目目录>
 5. **补证据**。每条标注证据来源与置信度；无证据的降级为待验证。
 6. **按模板写作**。用 [assets/experience-template.md](assets/experience-template.md)。
 7. **过自检**。全部通过才落盘。
-8. **写入并校验**。写入 `<experience_dir>/YYYYMMDD-<主题>.md`，运行 `scripts/validate_card.py <文件>`；FAIL 则按报错修正，PASS 后才回报路径、条数、最低置信度条目、是否触发拆分。
+8. **写入并校验**。写入第一步返回的 `suggested_name`（同日同主题自动追加 `-2`/`-3`）；落盘后运行 `scripts/validate_card.py <文件>`，FAIL 则按报错修正，PASS 后才回报路径、条数、最低置信度条目、是否触发拆分。
 
 ## 输出
 
@@ -59,6 +72,7 @@ python <本 skill 目录>/scripts/resolve_project.py --cwd <项目目录>
 ## 硬约束
 
 - 每条经验固定 8 行：标题、坐标、触发、做法、原因、证据、置信度、背景。
+- frontmatter 的 `track` 必填（slow / fast / fact），供下游直接映射时效复核周期。
 - 每条经验与反例必须带完整坐标：阶段 / 层 / 模块。
 - 单字段单行，任一行不得换行展开。
 - 全文不超过 150 行，经验条目不超过 10 条。
@@ -72,6 +86,7 @@ python <本 skill 目录>/scripts/resolve_project.py --cwd <项目目录>
 
 - [ ] 每条都能回答「下次遇到什么场景、该怎么做」
 - [ ] 每条都有完整坐标（阶段 / 层 / 模块）与证据
+- [ ] `track` 已填且与内容性质相符（方法论 slow / 工具快变 fast）
 - [ ] 删掉任意一句，信息量都会下降
 - [ ] 无背景铺垫，无过程还原
 - [ ] 边界明确：写清什么时候不适用

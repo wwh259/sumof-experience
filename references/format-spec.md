@@ -45,6 +45,11 @@ related: []
 | supersedes | 否 | 本卡取代的旧卡 id |
 | superseded_by | 否 | 取代本卡的 id，仅由后写卡填入 |
 | related | 否 | 补充或冲突的卡 id |
+| track | 是 | 时效轨道：`slow`（方法论/判断原则，+365 天复核）/ `fast`（工具/版本/价格/可用性，+90 天复核）/ `fact`（已发生完毕的历史事件，豁免复核）。必填，归纳进 L2 时直接映射复核周期，不再重判 |
+
+frontmatter 每字段一行，值不得换行展开（含多行字符串与缩进续行）。
+
+全文（frontmatter 与正文）禁止出现本机绝对路径（如 `D:\`、`C:\`、`/Users/`、`/home/`、`/mnt/`）；路径一律写「项目名 + 相对路径」，如 `qwen_deploy/.env`。
 
 `type` 取值：
 

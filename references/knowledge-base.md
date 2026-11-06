@@ -72,13 +72,16 @@ Trae / WorkBuddy / Codex 都通过本地文件读写，不需要平台专属接�
 1. 各平台配置指向同一个知识库路径（或 `SUM_OF_EXPERIENCE_KB` 相同）
 2. 各平台安装的 `SKILL.md` 与 `scripts/` 内容一致；推荐把本仓库作为唯一源，用软链 / junction 挂到各平台技能目录
 
-`resolve_project.py` 只读 KB 台账、只建 `experience/<项目>/`，不写任何共享状态，因此多平台并发写卡不会互相覆盖（文件名仍按 `YYYYMMDD-<主题>.md`，同一天同主题需人工避开）。知识库建议是独立 git 仓库；本 skill 不执行 git 操作，提交由用户决定。
+`resolve_project.py` 只读 KB 台账、只建 `experience/<项目>/`，不写任何共享状态，因此多平台并发写卡不会互相覆盖。文件名按 `YYYYMMDD-<主题>.md`；调用时传 `--slug <主题>`，脚本返回 `suggested_name`——同日同主题已存在时自动追加 `-2`、`-3` 后缀，以此返回值为准落盘，不再人工避开。知识库建议是独立 git 仓库；本 skill 不执行 git 操作，提交由用户决定。
 
 ## 5. 降级命令（Python 不可用）
 
 1. 读 `<KB>/_index.json` 取所有 `project` 值，或直接 `ls <KB>/raw/`
 2. 用当前目录名（或任一路径段）匹配，得项目键
 3. `grep -h '^source:' <KB>/experience/<项目>/*.md` 查重——**同一源文件已抽过就不要再写**
+
+> **source 写法规范**：查重依赖 source 字符串精确匹配，因此 source 必须写「session id（即台账 `_index.json` 的键）」，对话来源形如 `对话:<session-id>`，文件来源形如 `文件:<项目相对路径>`；不写自由文本描述（如「今天聊部署那段对话」），否则查重失效。
+
 4. 在 `<KB>/experience/<项目>/` 下写卡，再手工跑 `scripts/validate_card.py <文件>`
 
 ## 6. 边界情况

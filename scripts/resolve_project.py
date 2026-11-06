@@ -113,6 +113,18 @@ def existing_sources(exp_dir: Path) -> list[dict]:
     return out
 
 
+def next_filename(exp_dir: Path, slug: str) -> str:
+    """同日同主题已存在时自动追加 -2、-3 后缀，返回可用的落盘文件名。"""
+    from datetime import date
+    base = f"{date.today():%Y%m%d}-{slug}"
+    if not (exp_dir / f"{base}.md").exists():
+        return f"{base}.md"
+    n = 2
+    while (exp_dir / f"{base}-{n}.md").exists():
+        n += 1
+    return f"{base}-{n}.md"
+
+
 def emit(payload: dict, code: int = 0) -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
@@ -126,6 +138,7 @@ def main() -> None:
     ap.add_argument("--init", nargs="?", const=str(DEFAULT_KB), metavar="KB_PATH",
                     help=f"首次配置知识库路径；省略时使用默认 {DEFAULT_KB}")
     ap.add_argument("--show", action="store_true", help="只输出当前配置，不创建目录")
+    ap.add_argument("--slug", metavar="主题", help="英文短横线主题；给出时返回可用的落盘文件名 suggested_name（同名自动加 -2/-3）")
     args = ap.parse_args()
 
     if args.show:
@@ -171,15 +184,18 @@ def main() -> None:
     exp_dir = exp_root / project
     exp_dir.mkdir(parents=True, exist_ok=True)
 
-    emit({"status": "ok",
-          "kb_path": str(kb),
-          "project": project,
-          "project_source": project_source,
-          "experience_dir": str(exp_dir),
-          "remote": git_origin(cwd),
-          "existing_sources": existing_sources(exp_dir),
-          "kb_layout": layout,
-          "warning": warning})
+    payload = {"status": "ok",
+               "kb_path": str(kb),
+               "project": project,
+               "project_source": project_source,
+               "experience_dir": str(exp_dir),
+               "remote": git_origin(cwd),
+               "existing_sources": existing_sources(exp_dir),
+               "kb_layout": layout,
+               "warning": warning}
+    if args.slug:
+        payload["suggested_name"] = next_filename(exp_dir, args.slug)
+    emit(payload)
 
 
 if __name__ == "__main__":

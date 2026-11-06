@@ -12,6 +12,7 @@ type: decision
 status: active
 confidence: 0.8
 tags: [经验抽取, 结构规范, 坐标, 置信度]
+track: slow
 supersedes: []
 superseded_by: []
 related: []

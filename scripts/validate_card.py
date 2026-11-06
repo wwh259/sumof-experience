@@ -20,8 +20,13 @@ MODULES = {"Conversation", "Knowledge", "Retrieval", "Agent", "Governance", "Pla
 LAYERS = {"Interface", "Application", "Domain", "Infrastructure", "部署资产", "通用"}
 TYPES = {"decision", "pitfall", "pattern", "constraint", "path"}
 STATUS = {"active", "superseded", "deprecated"}
+TRACKS = {"slow", "fast", "fact"}
 
-REQUIRED = ["schema_version", "id", "title", "date", "source", "background", "stage", "type", "status", "confidence"]
+# 本机绝对路径模式：命中即报错，提示写「项目名 + 相对路径」
+# 盘符后紧跟正斜杠时排除，避免把 URL 的 :// 误判为盘符路径（如 https://example.com）
+ABS_PATH = re.compile(r"(?:[A-Za-z]:[\\/](?![/])|/Users/|/home/|/mnt/)")
+
+REQUIRED = ["schema_version", "id", "title", "date", "source", "background", "stage", "type", "status", "confidence", "track"]
 ENTRY_FIELDS = ["坐标", "触发", "做法", "原因", "证据", "置信度", "背景"]
 FAIL_FIELDS = ["坐标", "现象", "根因", "代价", "规避"]
 
@@ -42,6 +47,9 @@ def parse_frontmatter(lines: list[str], path: Path, errors: list[str]) -> dict[s
     for i in range(1, end):
         line = lines[i]
         if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if line[0] in (" ", "\t"):
+            errors.append(f"第 {i + 1} 行是多行值续行，frontmatter 单字段单行，不得换行展开")
             continue
         if ":" not in line:
             errors.append(f"第 {i + 1} 行不是 key: value")
@@ -101,6 +109,11 @@ def validate(path: Path) -> list[str]:
     if len(lines) > 150:
         errors.append(f"超过 150 行（{len(lines)}）")
 
+    for i, ln in enumerate(lines):
+        if ABS_PATH.search(ln):
+            errors.append(f"第 {i + 1} 行含本机绝对路径，应写「项目名 + 相对路径」: {ln.strip()[:40]}")
+            break
+
     fm = parse_frontmatter(lines, path, errors)
     for key in REQUIRED:
         if not fm.get(key):
@@ -110,8 +123,20 @@ def validate(path: Path) -> list[str]:
         errors.append(f"未知 schema_version: {fm['schema_version']}")
     if fm.get("id") and fm["id"] != path.stem:
         errors.append(f"id 与文件名不一致: {fm['id']} != {path.stem}")
+    if fm.get("title") and len(fm["title"]) > 20:
+        errors.append(f"title 超过 20 字（{len(fm['title'])} 字）: {fm['title']}")
     if fm.get("date") and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", fm["date"]):
         errors.append(f"date 格式错误: {fm['date']}")
+    if fm.get("tags"):
+        m = re.fullmatch(r"\[(.*)\]", fm["tags"])
+        if not m:
+            errors.append(f"tags 应为行内列表 [a, b]: {fm['tags']}")
+        else:
+            tags = [t.strip() for t in m.group(1).split(",") if t.strip()]
+            if not 2 <= len(tags) <= 5:
+                errors.append(f"tags 数量 {len(tags)} 个，应为 2–5 个")
+    if fm.get("track") and fm["track"] not in TRACKS:
+        errors.append(f"非法 track: {fm['track']}（取值 slow / fast / fact）")
     if fm.get("stage") and fm["stage"] not in STAGES:
         errors.append(f"非法 stage: {fm['stage']}")
     if fm.get("module") and fm["module"] not in MODULES:
